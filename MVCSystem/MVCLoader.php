@@ -66,7 +66,7 @@ class MVCLoader {
 	 * @return void
 	 */
 	public static function ExecuteLoader( $Class ) {
-		var_dump( 'Load: '.$Class );
+		//var_dump( 'Load: '.$Class );
 		require_once( ( str_replace( 'Class', '', $Class ).'.php' ) );
 	}
 }
