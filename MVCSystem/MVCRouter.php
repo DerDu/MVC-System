@@ -40,13 +40,13 @@
  * @subpackage MVCRouter
  */
 namespace MVCSystem;
-use \AioSystem\Api\Stack;
-use \AioSystem\Api\Seo;
+use \AIOSystem\Api\Stack;
+use \AIOSystem\Api\Seo;
 /**
  * @package MVCSystem
  * @subpackage MVCRouter
  */
-class ClassMVCRouter {
+class MVCRouter {
 	/** @var \AIOSystem\Core\ClassStackRegister $RouterStack */
 	private static $RouterStack = null;
 	/** @var string $NoMatchController */
@@ -58,7 +58,7 @@ class ClassMVCRouter {
 	 *
 	 * @static
 	 * @param null|string $RoutePath
-	 * @return ClassMVCRoute
+	 * @return MVCRoute
 	 */
 	public static function Route( $RoutePath = null ) {
 		/**
@@ -72,7 +72,7 @@ class ClassMVCRouter {
 		 * Search for route
 		 */
 		$RouterStack = self::$RouterStack->listRegister();
-		/** @var ClassMVCRoute $Route */
+		/** @var MVCRoute $Route */
 		foreach( (array)$RouterStack as $Route ) {
 			if( $Route->IsMatch( $RoutePath ) ) {
 				return $Route;
@@ -81,7 +81,7 @@ class ClassMVCRouter {
 		/**
 		 * Route not found
 		 */
-		$NoMatchRoute = new ClassMVCRoute( array( 'RouterPath'=>$RoutePath ) );
+		$NoMatchRoute = new MVCRoute( array( 'RouterPath'=>$RoutePath ) );
 		$NoMatchRoute->optionDefinition('');
 		$NoMatchRoute->optionRoute('');
 		$NoMatchRoute->optionController( self::$NoMatchController );
@@ -109,7 +109,7 @@ class ClassMVCRouter {
 		/**
 		 * Define route
 		 */
-		$ClassMVCRoute = new ClassMVCRoute(
+		$ClassMVCRoute = new MVCRoute(
 			$ParameterDefault
 		);
 		$ClassMVCRoute->optionDefinition( $Pattern );
@@ -118,7 +118,7 @@ class ClassMVCRouter {
 		/**
 		 * Connect route
 		 */
-		/** @var ClassMVCRoute $ClassMVCRouteCheck */
+		/** @var MVCRoute $ClassMVCRouteCheck */
 		if( null === ( $ClassMVCRouteCheck = self::$RouterStack->getRegister( $ClassMVCRoute->optionDefinition() ) ) ) {
 			self::$RouterStack->setRegister( $ClassMVCRoute->optionDefinition(), $ClassMVCRoute );
 		} else {

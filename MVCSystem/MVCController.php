@@ -44,7 +44,7 @@ namespace MVCSystem;
  * @package MVCSystem
  * @subpackage MVCController
  */
-class ClassMVCController {
+class MVCController {
 	/**
 	 * @param string $Action
 	 * @param string $Parameter

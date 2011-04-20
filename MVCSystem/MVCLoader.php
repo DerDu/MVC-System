@@ -44,7 +44,7 @@ namespace MVCSystem;
  * @package MVCSystem
  * @subpackage MVCLoader
  */
-class ClassMVCLoader {
+class MVCLoader {
 	/**
 	 * Register MVCLoader with Php-AutoLoad
 	 *
@@ -66,6 +66,7 @@ class ClassMVCLoader {
 	 * @return void
 	 */
 	public static function ExecuteLoader( $Class ) {
+		var_dump( 'Load: '.$Class );
 		require_once( ( str_replace( 'Class', '', $Class ).'.php' ) );
 	}
 }

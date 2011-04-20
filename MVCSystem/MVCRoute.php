@@ -44,7 +44,7 @@ namespace MVCSystem;
  * @package MVCSystem
  * @subpackage MVCRoute
  */
-class ClassMVCRoute {
+class MVCRoute {
 	/** @var string $optionUri URI Syntax */
 	private $optionDefinition = '/{Controller}/{Action}';
 	/** @var string $optionUriPattern URI RexExpr */
@@ -68,7 +68,7 @@ class ClassMVCRoute {
 	 * Check if pattern matches route
 	 *
 	 * @param string $Route
-	 * @return false|ClassMVCRoute
+	 * @return false|MVCRoute
 	 */
 	public function IsMatch( $Route ) {
 		if( preg_match( '!^'.$this->optionPattern.'$!is', $Route ) ) {
