@@ -64,6 +64,7 @@ class MVCManager {
 	public static function RegisterLoader() {
 		require_once( __DIR__.DIRECTORY_SEPARATOR.'MVCLoader.php' );
 		MVCLoader::RegisterLoader();
+		MVCRouter::Boot();
 	}
 	/**
 	 * Connect MVCRoute
@@ -110,13 +111,13 @@ class MVCManager {
 				$MVCRoute = MVCRouter::Route( self::$AuthenticationPartialContent );
 			}
 		}
-		var_dump( $MVCRoute );
+		//var_dump( $MVCRoute );
 		/**
 		 * Create controller
 		 */
 		/** @var string $MVCController */
 		$MVCController = $MVCRoute->GetController();
-		var_dump( $MVCController );
+		//var_dump( $MVCController );
 		/** @var MVCController $MVCController */
 		$MVCController = new $MVCController;
 		/**
