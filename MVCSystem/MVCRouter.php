@@ -42,6 +42,7 @@
 namespace MVCSystem;
 use \AIOSystem\Api\Stack;
 use \AIOSystem\Api\Seo;
+use \AIOSystem\Api\Xml;
 /**
  * @package MVCSystem
  * @subpackage MVCRouter
@@ -50,9 +51,21 @@ class MVCRouter {
 	/** @var \AIOSystem\Core\ClassStackRegister $RouterStack */
 	private static $RouterStack = null;
 	/** @var string $NoMatchController */
-	private static $NoMatchController = 'MVCSystem\Controller\ClassMVCRouteError';
+	private static $NoMatchController = 'MVCSystem\Controller\MVCError';
 	/** @var string $NoMatchAction */
-	private static $NoMatchAction = 'ActionShow404';
+	private static $NoMatchAction = 'Display';
+
+	public static function Boot() {
+		$MVCRouterConfiguration = Xml::Parser( __DIR__.DIRECTORY_SEPARATOR.'MVCRouter.xml' )->groupXmlNode('MVCRoute');
+		/** @var \AIOSystem\Core\ClassXmlNode $MVCRoute */
+		foreach( (array)$MVCRouterConfiguration as $MVCRoute ) {
+			$Definition = trim( $MVCRoute->searchXmlNode('Definition')->propertyContent() );
+			$Controller = trim( $MVCRoute->searchXmlNode('Controller')->propertyContent() );
+			$Action = trim( $MVCRoute->searchXmlNode('Action')->propertyContent() );
+			MVCManager::RegisterRoute( $Definition, $Controller, $Action );
+		}
+	}
+
 	/**
 	 * Fetch associated route
 	 *
@@ -81,7 +94,7 @@ class MVCRouter {
 		/**
 		 * Route not found
 		 */
-		$NoMatchRoute = new MVCRoute( array( 'RouterPath'=>$RoutePath ) );
+		$NoMatchRoute = new MVCRoute( array( 'MVCErrorType'=>404,'MVCErrorInformation'=>$RoutePath ) );
 		$NoMatchRoute->optionDefinition('');
 		$NoMatchRoute->optionRoute('');
 		$NoMatchRoute->optionController( self::$NoMatchController );
