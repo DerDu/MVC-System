@@ -64,10 +64,10 @@ class MVCManager {
 	 * @static
 	 * @return void
 	 */
-	public static function RegisterLoader( $PathToMvcSystem = null, $PathToApplication = null ) {
+	public static function RegisterLoader( $RelativePathFromMvcToApplication = null, $RelativePathToMvcSystem = null ) {
 		require_once( __DIR__.DIRECTORY_SEPARATOR.'MVCLoader.php' );
-		MVCLoader::RegisterLoader( $PathToMvcSystem );
-		MVCLoader::RegisterApplication( $PathToApplication );
+		MVCLoader::RegisterLoader( $RelativePathToMvcSystem );
+		MVCLoader::RegisterApplication( $RelativePathFromMvcToApplication );
 	}
 	/**
 	 * @param string $ConfigurationFile
@@ -213,13 +213,22 @@ class MVCManager {
 		}
 		return self::$BaseDirectoryView;
 	}
-
+	/**
+	 * @static
+	 * @param null|string $RouteDefinition
+	 * @return string
+	 */
 	public static function AccessDeniedRoute( $RouteDefinition = null ) {
 		if( $RouteDefinition !== null ) {
 			self::$AuthenticationMainContent = $RouteDefinition;
 		}
 		return self::$AuthenticationMainContent;
 	}
+	/**
+	 * @static
+	 * @param null|string $RouteDefinition
+	 * @return string
+	 */
 	public static function AccessDeniedLink( $RouteDefinition = null ) {
 		if( $RouteDefinition !== null ) {
 			self::$AuthenticationPartialContent = $RouteDefinition;
