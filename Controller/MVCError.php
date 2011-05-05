@@ -39,7 +39,7 @@
  * @package MVCSystem\Controller
  * @subpackage MVCError
  */
-namespace MVCSystem\Controller;
+namespace Controller;
 /**
  * @package MVCSystem\Controller
  * @subpackage MVCError
@@ -47,7 +47,7 @@ namespace MVCSystem\Controller;
 class MVCError extends \MVCSystem\MVCController {
 
 	public function Display( $MVCErrorType, $MVCErrorInformation = '' ) {
-		$View = new \MVCSystem\View\MVCError();
+		$View = new \View\MVCError();
 		$View->setData('MVCErrorType',$MVCErrorType);
 		$View->setData('MVCErrorInformation',$MVCErrorInformation);
 		return $View->Display();

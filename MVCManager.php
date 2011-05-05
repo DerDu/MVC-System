@@ -42,17 +42,20 @@
 namespace MVCSystem;
 use \AIOSystem\Api\Authentication;
 use \AIOSystem\Api\System;
+use \AIOSystem\Api\Event;
 /**
  * @package MVCSystem
  * @subpackage MVCManager
  */
 class MVCManager {
+	private static $BaseDirectoryApplication = '';
+
 	private static $BaseDirectoryController = 'MVCSystem\Controller';
 	private static $BaseDirectoryModel = 'MVCSystem\Model';
 	private static $BaseDirectoryView = 'MVCSystem\View';
 
-	public static $AuthenticationMainContent = '/Authentication';
-	public static $AuthenticationPartialContent = '/Authentication/Link';
+	public static $AuthenticationMainContent = '/Access/Denied/Route';
+	public static $AuthenticationPartialContent = '/Access/Denied/Link';
 	public static $AuthenticationLogin = '/Authentication/Login';
 	public static $AuthenticationLogout = '/Authentication/Logout';
 	/**
@@ -61,10 +64,17 @@ class MVCManager {
 	 * @static
 	 * @return void
 	 */
-	public static function RegisterLoader() {
+	public static function RegisterLoader( $PathToMvcSystem = null, $PathToApplication = null ) {
 		require_once( __DIR__.DIRECTORY_SEPARATOR.'MVCLoader.php' );
-		MVCLoader::RegisterLoader();
-		MVCRouter::Boot();
+		MVCLoader::RegisterLoader( $PathToMvcSystem );
+		MVCLoader::RegisterApplication( $PathToApplication );
+	}
+	/**
+	 * @param string $ConfigurationFile
+	 * @return void
+	 */
+	public static function RegisterRouter( $ConfigurationFile = null ) {
+		MVCRouter::Boot( $ConfigurationFile );
 	}
 	/**
 	 * Connect MVCRoute
@@ -74,14 +84,15 @@ class MVCManager {
 	 * @param string $Controller
 	 * @param string $Action
 	 * @param array $ParameterDefault
-	 * @return void
+	 * @return MVCRoute
 	 */
-	public static function RegisterRoute( $Pattern, $Controller = '{Controller}', $Action = '{Action}', $ParameterDefault = array() ) {
+	public static function RegisterRoute( $Pattern, $Controller = '{Controller}', $Action = '{Action}', $ParameterDefault = array(), $RestrictedAccess = false ) {
 		return MVCRouter::Register(
 			$Pattern,
 			System::DirectorySyntax( self::DirectoryController(), true, System::DIRECTORY_SEPARATOR_BACKSLASH ).$Controller,
 			$Action,
-			$ParameterDefault
+			$ParameterDefault,
+			$RestrictedAccess
 		);
 	}
 	/**
@@ -97,27 +108,32 @@ class MVCManager {
 		 */
 		$MVCRoute = MVCRouter::Route( $UriPath );
 		/**
-		 * Check access rights
+		 * Check route restriction
 		 */
-		if( !1 /*Authentication::IsValid( $MVCRoute->GetController().$MVCRoute->GetAction() )*/ ) {
-			// TODO: [Add] Authentication & Access to Route
-			if( $UriPath === null ) {
-			// = Main content -> Login page
-				var_dump( 'MainContent' );
-				$MVCRoute = MVCRouter::Route( self::$AuthenticationMainContent );
-			} else {
-			// = Partial content -> Link to login page
-				var_dump( 'PartialContent' );
-				$MVCRoute = MVCRouter::Route( self::$AuthenticationPartialContent );
+		if( $MVCRoute->IsRestricted() ) {
+			$MVCRight = str_replace('\\','-',$MVCRoute->GetController().'-'.$MVCRoute->GetAction());
+			/**
+			 * Create/Edit access right
+			 */
+			Authentication::EditRight( $MVCRight,'created by MVC-System',$MVCRoute->optionSource() );
+			/**
+			 * Check access right
+			 */
+			if( !Authentication::Checkpoint( $MVCRight,$MVCRoute->optionSource() ) ) {
+				if( $UriPath === null ) {
+				// = Main content -> Login page
+					$MVCRoute = MVCRouter::Route( self::AccessDeniedRoute() );
+				} else {
+				// = Partial content -> Link to login page
+					$MVCRoute = MVCRouter::Route( self::AccessDeniedLink() );
+				}
 			}
 		}
-		//var_dump( $MVCRoute );
 		/**
 		 * Create controller
 		 */
 		/** @var string $MVCController */
 		$MVCController = $MVCRoute->GetController();
-		//var_dump( $MVCController );
 		/** @var MVCController $MVCController */
 		$MVCController = new $MVCController;
 		/**
@@ -125,6 +141,15 @@ class MVCManager {
 		 */
 		/** @var \ReflectionClass $RefMVCController */
 		$RefMVCController = new \ReflectionClass( $MVCRoute->GetController() );
+		/**
+		 * No Method available ? -> NoRoute
+		 */
+		if( ! $RefMVCController->hasMethod( $MVCRoute->GetAction() ) ) {
+			$MVCRoute = MVCRouter::NoRoute( $MVCRoute->optionRoute() );
+			$MVCController = $MVCRoute->GetController();
+			$MVCController = new $MVCController;
+			$RefMVCController = new \ReflectionClass( $MVCRoute->GetController() );
+		}
 		/** @var \ReflectionMethod $RefMVCAction */
 		$RefMVCAction = $RefMVCController->getMethod( $MVCRoute->GetAction() );
 		/** @var \ReflectionParameter[] $RefMVCParameterDefinition */
@@ -162,6 +187,16 @@ class MVCManager {
 	 * @static
 	 * @return string
 	 */
+	public static function DirectoryApplication( $PathName = null ) {
+		if( $PathName !== null ) {
+			self::$BaseDirectoryApplication = $PathName;
+		}
+		return self::$BaseDirectoryApplication;
+	}
+	/**
+	 * @static
+	 * @return string
+	 */
 	public static function DirectoryModel( $PathName = null ) {
 		if( $PathName !== null ) {
 			self::$BaseDirectoryModel = $PathName;
@@ -177,5 +212,18 @@ class MVCManager {
 			self::$BaseDirectoryView = $PathName;
 		}
 		return self::$BaseDirectoryView;
+	}
+
+	public static function AccessDeniedRoute( $RouteDefinition = null ) {
+		if( $RouteDefinition !== null ) {
+			self::$AuthenticationMainContent = $RouteDefinition;
+		}
+		return self::$AuthenticationMainContent;
+	}
+	public static function AccessDeniedLink( $RouteDefinition = null ) {
+		if( $RouteDefinition !== null ) {
+			self::$AuthenticationPartialContent = $RouteDefinition;
+		}
+		return self::$AuthenticationPartialContent;
 	}
 }

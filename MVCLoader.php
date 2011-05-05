@@ -40,23 +40,41 @@
  * @subpackage MVCLoader
  */
 namespace MVCSystem;
+use \AIOSystem\Api\Event;
+use \AIOSystem\Api\System;
 /**
  * @package MVCSystem
  * @subpackage MVCLoader
  */
 class MVCLoader {
+	const MVC_PREFIX_NAMESPACE = __NAMESPACE__;
+	const MVC_PREFIX_CLASS = 'Class';
+
+	private static $BaseDirectoryMvcSystem = '';
+	private static $BaseDirectoryApplication = '';
+
 	/**
 	 * Register MVCLoader with Php-AutoLoad
 	 *
 	 * @static
 	 * @return void
 	 */
-	public static function RegisterLoader() {
+	public static function RegisterLoader( $Path = null ) {
+		self::BaseDirectoryMvcSystem( $Path );
 		$AutoLoader = spl_autoload_functions();
 		if( $AutoLoader === false || empty( $AutoLoader ) || !in_array( array(__CLASS__,'ExecuteLoader'), $AutoLoader, true ) ) {
 			spl_autoload_register( array(__CLASS__,'ExecuteLoader') );
 		}
 	}
+
+	public static function RegisterApplication( $Path = null ) {
+		self::BaseDirectoryApplication( $Path );
+		$AutoLoader = spl_autoload_functions();
+		if( $AutoLoader === false || empty( $AutoLoader ) || !in_array( array(__CLASS__,'ExecuteApplication'), $AutoLoader, true ) ) {
+			spl_autoload_register( array(__CLASS__,'ExecuteApplication') );
+		}
+	}
+
 	/**
 	 * Requires the given class for MVC
 	 * Called from MVCLoader (private)
@@ -66,10 +84,56 @@ class MVCLoader {
 	 * @return void
 	 */
 	public static function ExecuteLoader( $Class ) {
-		$Class = str_replace( 'Class', '', $Class ).'.php';
-		if( file_exists( $Class ) ) {
-			//var_dump( 'MVC Load: '.$Class );
-			require_once( $Class );
+		$Class = str_replace( self::MVC_PREFIX_NAMESPACE, '', $Class );
+		$Class = explode( '\\', $Class );
+		$ClassName = array_pop( $Class );
+		$ClassName = preg_replace(
+						'!(^'.self::MVC_PREFIX_CLASS.')!is'
+						, '', $ClassName );
+		array_push( $Class, $ClassName );
+		$ClassLocation = System::DirectorySyntax(__DIR__.DIRECTORY_SEPARATOR.self::BaseDirectoryMvcSystem().DIRECTORY_SEPARATOR.implode( '\\', $Class ).'.php',false,System::DIRECTORY_SEPARATOR_BACKSLASH);
+		if( file_exists( $ClassLocation ) ) {
+			//Event::Message( 'MVC Load: '.$ClassLocation );
+			require_once( $ClassLocation );
+			return true;
 		}
+		return false;
+	}
+	/**
+	 * Requires the given class for Application
+	 * Called from MVCLoader (private)
+	 *
+	 * @static
+	 * @param string $Class
+	 * @return void
+	 */
+	public static function ExecuteApplication( $Class ) {
+		$ClassLocation = System::DirectorySyntax(__DIR__.DIRECTORY_SEPARATOR.self::BaseDirectoryApplication().DIRECTORY_SEPARATOR.$Class.'.php',false,System::DIRECTORY_SEPARATOR_BACKSLASH);
+		if( file_exists( $ClassLocation ) ) {
+			//Event::Message( 'APP Load: '.$ClassLocation );
+			require_once( $ClassLocation );
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * @static
+	 * @param null|string $Path
+	 * @return string
+	 */
+	public static function BaseDirectoryMvcSystem( $Path = null ) {
+		if( $Path !== null ) {
+			self::$BaseDirectoryMvcSystem = $Path;
+		} return self::$BaseDirectoryMvcSystem;
+	}
+	/**
+	 * @static
+	 * @param null|string $Path
+	 * @return string
+	 */
+	public static function BaseDirectoryApplication( $Path = null ) {
+		if( $Path !== null ) {
+			self::$BaseDirectoryApplication = $Path;
+		} return self::$BaseDirectoryApplication;
 	}
 }

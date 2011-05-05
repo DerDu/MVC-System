@@ -40,6 +40,7 @@
  * @subpackage MVCRoute
  */
 namespace MVCSystem;
+use \AIOSystem\Api\System;
 /**
  * @package MVCSystem
  * @subpackage MVCRoute
@@ -55,6 +56,10 @@ class MVCRoute {
 	private $optionController = '{Controller}';
 	/** @var string $optionAction Action [Pattern/Name] */
 	private $optionAction = '{Action}';
+	/** @var bool $optionRestricted */
+	private $optionRestricted = false;
+	/** @var string $optionSource */
+	private $optionSource = 'MVCSystem';
 	/** @var array $optionDefault Default parameter ($_REQUEST) */
 	private $optionDefault = array();
 	/**
@@ -76,6 +81,9 @@ class MVCRoute {
 			return $this;
 		} return false;
 	}
+	public function IsRestricted() {
+		return $this->optionRestricted();
+	}
 	/**
 	 * Get controller name
 	 *
@@ -85,8 +93,11 @@ class MVCRoute {
 		if( substr( $this->optionController(), 0, 1 ) == '{' ) {
 			$Pattern = explode( '/', substr( $this->optionDefinition(), 0 , strpos( $this->optionDefinition(), $this->optionController() ) -1 ) );
 			$Route = explode( '/', $this->optionRoute );
-			return current( array_slice( $Route, count( $Pattern ) ) );
-		} return $this->optionController();
+			$MVCController = current( array_slice( $Route, count( $Pattern ) ) );
+		} else {
+			$MVCController = $this->optionController();
+		}
+		return $MVCController;
 	}
 	/**
 	 * Get action name
@@ -198,5 +209,27 @@ class MVCRoute {
 		if( $Route !== null ) {
 			$this->optionRoute = $Route;
 		} return $this->optionRoute;
+	}
+	/**
+	 * Set/Get Restricted
+	 *
+	 * @param null|bool $Restricted
+	 * @return null|bool
+	 */
+	public function optionRestricted( $Restricted = null ) {
+		if( $Restricted !== null ) {
+			$this->optionRestricted = $Restricted;
+		} return $this->optionRestricted;
+	}
+	/**
+	 * Set/Get Source
+	 *
+	 * @param null|bool $Source
+	 * @return null|bool
+	 */
+	public function optionSource( $Source = null ) {
+		if( $Source !== null ) {
+			$this->optionSource = $Source;
+		} return $this->optionSource;
 	}
 }

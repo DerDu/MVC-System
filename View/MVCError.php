@@ -39,7 +39,8 @@
  * @package MVCSystem\View
  * @subpackage MVCError
  */
-namespace MVCSystem\View;
+namespace View;
+use \AIOSystem\Api\Event;
 /*
  * @package MVCSystem\View
  * @subpackage MVCError
@@ -57,6 +58,8 @@ class MVCError extends \MVCSystem\MVCView {
 	 * @return string
 	 */
 	public function Display() {
+		//Event::Message('View: '.__DIR__);
+
 		$Error = $this->Template( 'MVCError.tpl' );
 		switch( $this->getData('MVCErrorType') ) {
 			case 404: {

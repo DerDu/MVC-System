@@ -43,6 +43,7 @@ namespace MVCSystem;
 use \AIOSystem\Api\Stack;
 use \AIOSystem\Api\Seo;
 use \AIOSystem\Api\Xml;
+use \AIOSystem\Api\System;
 /**
  * @package MVCSystem
  * @subpackage MVCRouter
@@ -51,18 +52,34 @@ class MVCRouter {
 	/** @var \AIOSystem\Core\ClassStackRegister $RouterStack */
 	private static $RouterStack = null;
 	/** @var string $NoMatchController */
-	private static $NoMatchController = 'MVCSystem\Controller\MVCError';
+	private static $NoMatchController = 'Controller\MVCError';
 	/** @var string $NoMatchAction */
 	private static $NoMatchAction = 'Display';
 
-	public static function Boot() {
-		$MVCRouterConfiguration = Xml::Parser( __DIR__.DIRECTORY_SEPARATOR.'MVCRouter.xml' )->groupXmlNode('MVCRoute');
-		/** @var \AIOSystem\Core\ClassXmlNode $MVCRoute */
-		foreach( (array)$MVCRouterConfiguration as $MVCRoute ) {
-			$Definition = trim( $MVCRoute->searchXmlNode('Definition')->propertyContent() );
-			$Controller = trim( $MVCRoute->searchXmlNode('Controller')->propertyContent() );
-			$Action = trim( $MVCRoute->searchXmlNode('Action')->propertyContent() );
-			MVCManager::RegisterRoute( $Definition, $Controller, $Action );
+	public static function Boot( $ConfigurationFile = null ) {
+		if( $ConfigurationFile === null ) {
+			$ConfigurationFile = __DIR__.DIRECTORY_SEPARATOR.'MVCRouter.xml';
+		}
+		if( file_exists( $ConfigurationFile ) ) {
+			$Configuration = System::File( $ConfigurationFile );
+			$MVCRouterConfiguration = Xml::Parser( $Configuration->propertyFileLocation() )->groupXmlNode('MVCRoute');
+			/** @var \AIOSystem\Core\ClassXmlNode $MVCRoute */
+			foreach( (array)$MVCRouterConfiguration as $MVCRoute ) {
+				$Definition = trim( $MVCRoute->searchXmlNode('Definition')->propertyContent() );
+				$Controller = trim( $MVCRoute->searchXmlNode('Controller')->propertyContent() );
+				$Action = trim( $MVCRoute->searchXmlNode('Action')->propertyContent() );
+				$ParameterList = $MVCRoute->propertyChildList();
+				/** @var \AIOSystem\Core\ClassXmlNode $Parameter */
+				$DefaultParameter = array();
+				foreach( (array)$ParameterList as $Parameter ) {
+					$DefaultParameter[$Parameter->propertyName()] = trim($Parameter->propertyContent());
+				}
+				$Restricted = ($MVCRoute->propertyAttribute('Restricted')?true:false);
+				$Route = MVCManager::RegisterRoute( $Definition, $Controller, $Action, $DefaultParameter, $Restricted );
+				$Route->optionSource( basename( $Configuration->propertyFilePath() ) );
+			}
+		} else {
+			throw new \Exception('Router configuration file not available!');
 		}
 	}
 
@@ -94,6 +111,13 @@ class MVCRouter {
 		/**
 		 * Route not found
 		 */
+		return self::NoRoute( $RoutePath );
+	}
+	/**
+	 * @param string $RoutePath
+	 * @return MVCRoute
+	 */
+	public static function NoRoute( $RoutePath ) {
 		$NoMatchRoute = new MVCRoute( array( 'MVCErrorType'=>404,'MVCErrorInformation'=>$RoutePath ) );
 		$NoMatchRoute->optionDefinition('');
 		$NoMatchRoute->optionRoute('');
@@ -110,9 +134,9 @@ class MVCRouter {
 	 * @param string $Controller
 	 * @param string $Action
 	 * @param array $ParameterDefault
-	 * @return void
+	 * @return MVCRoute
 	 */
-	public static function Register( $Pattern, $Controller = '{Controller}', $Action = '{Action}', $ParameterDefault = array() ) {
+	public static function Register( $Pattern, $Controller = '{Controller}', $Action = '{Action}', $ParameterDefault = array(), $RestrictedAccess = false ) {
 		/**
 		 * Prepare router stack
 		 */
@@ -128,6 +152,7 @@ class MVCRouter {
 		$ClassMVCRoute->optionDefinition( $Pattern );
 		$ClassMVCRoute->optionController( $Controller );
 		$ClassMVCRoute->optionAction( $Action );
+		$ClassMVCRoute->optionRestricted( $RestrictedAccess );
 		/**
 		 * Connect route
 		 */
@@ -137,5 +162,6 @@ class MVCRouter {
 		} else {
 			throw new \Exception('Route already exists! '.$ClassMVCRouteCheck->optionDefinition().' >> '.$ClassMVCRouteCheck->optionController().' >> '.$ClassMVCRouteCheck->optionAction() );
 		}
+		return $ClassMVCRoute;
 	}
 }
