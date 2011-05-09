@@ -56,8 +56,9 @@ class MVCManager {
 
 	public static $AuthenticationMainContent = '/Access/Denied/Route';
 	public static $AuthenticationPartialContent = '/Access/Denied/Link';
-	public static $AuthenticationLogin = '/Authentication/Login';
-	public static $AuthenticationLogout = '/Authentication/Logout';
+	//public static $AuthenticationLogin = '/Authentication/Login';
+	//public static $AuthenticationLogout = '/Authentication/Logout';
+
 	/**
 	 * Register MVCLoader
 	 *
@@ -76,6 +77,7 @@ class MVCManager {
 	public static function RegisterRouter( $ConfigurationFile = null ) {
 		MVCRouter::Boot( $ConfigurationFile );
 	}
+
 	/**
 	 * Connect MVCRoute
 	 *
@@ -173,6 +175,7 @@ class MVCManager {
 		 */
 		return $MVCController->Execute( $MVCRoute->GetAction(), $RefMVCParameterList );
 	}
+
 	/**
 	 * @static
 	 * @return string
@@ -213,6 +216,7 @@ class MVCManager {
 		}
 		return self::$BaseDirectoryView;
 	}
+
 	/**
 	 * @static
 	 * @param null|string $RouteDefinition
@@ -234,5 +238,16 @@ class MVCManager {
 			self::$AuthenticationPartialContent = $RouteDefinition;
 		}
 		return self::$AuthenticationPartialContent;
+	}
+
+	/**
+	 * @static
+	 * @param string $Namespace
+	 * @param string $Class
+	 * @param string $Table
+	 * @return void
+	 */
+	public static function BuildModel( $Namespace, $Class, $Table ) {
+		return MVCFactory::CreateModel( $Namespace, $Class, $Table );
 	}
 }
