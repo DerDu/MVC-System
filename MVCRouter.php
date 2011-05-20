@@ -44,6 +44,7 @@ use \AIOSystem\Api\Stack;
 use \AIOSystem\Api\Seo;
 use \AIOSystem\Api\Xml;
 use \AIOSystem\Api\System;
+use \AIOSystem\Api\Event;
 /**
  * @package MVCSystem
  * @subpackage MVCRouter
@@ -57,26 +58,41 @@ class MVCRouter {
 	private static $NoMatchAction = 'Display';
 
 	public static function Boot( $ConfigurationFile = null ) {
+		/**
+		 * Load default configuration?
+		 */
 		if( $ConfigurationFile === null ) {
 			$ConfigurationFile = __DIR__.DIRECTORY_SEPARATOR.'MVCRouter.xml';
 		}
 		if( file_exists( $ConfigurationFile ) ) {
 			$Configuration = System::File( $ConfigurationFile );
 			$MVCRouterConfiguration = Xml::Parser( $Configuration->propertyFileLocation() )->groupXmlNode('MVCRoute');
+			/**
+			 * Register available routes
+			 */
 			/** @var \AIOSystem\Core\ClassXmlNode $MVCRoute */
 			foreach( (array)$MVCRouterConfiguration as $MVCRoute ) {
 				$Definition = trim( $MVCRoute->searchXmlNode('Definition')->propertyContent() );
 				$Controller = trim( $MVCRoute->searchXmlNode('Controller')->propertyContent() );
 				$Action = trim( $MVCRoute->searchXmlNode('Action')->propertyContent() );
-				$ParameterList = $MVCRoute->propertyChildList();
-				/** @var \AIOSystem\Core\ClassXmlNode $Parameter */
-				$DefaultParameter = array();
-				foreach( (array)$ParameterList as $Parameter ) {
-					$DefaultParameter[$Parameter->propertyName()] = trim($Parameter->propertyContent());
+				$MVCParameter = $MVCRoute->searchXmlNode('Parameter');
+				if( is_object($MVCParameter) ) {
+					$ParameterList = $MVCParameter->propertyChildList();
+					/** @var \AIOSystem\Core\ClassXmlNode $Parameter */
+					$DefaultParameter = array();
+					foreach( (array)$ParameterList as $Parameter ) {
+						$DefaultParameter[$Parameter->propertyName()] = trim($Parameter->propertyContent());
+					}
+				} else {
+					$DefaultParameter = array();
 				}
 				$Restricted = ($MVCRoute->propertyAttribute('Restricted')?true:false);
 				$Route = MVCManager::RegisterRoute( $Definition, $Controller, $Action, $DefaultParameter, $Restricted );
-				$Route->optionSource( basename( $Configuration->propertyFilePath() ) );
+				/**
+				 * Save configuration source path
+				 */
+				$Source = basename( MVCLoader::BaseDirectoryApplication() );
+				$Route->optionSource( $Source );
 			}
 		} else {
 			throw new \Exception('Router configuration file not available!');
@@ -123,6 +139,7 @@ class MVCRouter {
 		$NoMatchRoute->optionRoute('');
 		$NoMatchRoute->optionController( self::$NoMatchController );
 		$NoMatchRoute->optionAction( self::$NoMatchAction );
+		Event::Journal( 'Access to unknown route: '.$RoutePath, __CLASS__ );
 		return $NoMatchRoute;
 	}
 	/**
@@ -146,22 +163,22 @@ class MVCRouter {
 		/**
 		 * Define route
 		 */
-		$ClassMVCRoute = new MVCRoute(
+		$MVCRoute = new MVCRoute(
 			$ParameterDefault
 		);
-		$ClassMVCRoute->optionDefinition( $Pattern );
-		$ClassMVCRoute->optionController( $Controller );
-		$ClassMVCRoute->optionAction( $Action );
-		$ClassMVCRoute->optionRestricted( $RestrictedAccess );
+		$MVCRoute->optionDefinition( $Pattern );
+		$MVCRoute->optionController( $Controller );
+		$MVCRoute->optionAction( $Action );
+		$MVCRoute->optionRestricted( $RestrictedAccess );
 		/**
 		 * Connect route
 		 */
-		/** @var MVCRoute $ClassMVCRouteCheck */
-		if( null === ( $ClassMVCRouteCheck = self::$RouterStack->getRegister( $ClassMVCRoute->optionDefinition() ) ) ) {
-			self::$RouterStack->setRegister( $ClassMVCRoute->optionDefinition(), $ClassMVCRoute );
+		/** @var MVCRoute $MVCRouteCheck */
+		if( null === ( $MVCRouteCheck = self::$RouterStack->getRegister( $MVCRoute->optionDefinition() ) ) ) {
+			self::$RouterStack->setRegister( $MVCRoute->optionDefinition(), $MVCRoute );
 		} else {
-			throw new \Exception('Route already exists! '.$ClassMVCRouteCheck->optionDefinition().' >> '.$ClassMVCRouteCheck->optionController().' >> '.$ClassMVCRouteCheck->optionAction() );
+			throw new \Exception('Route already exists! '.$MVCRouteCheck->optionDefinition().' >> '.$MVCRouteCheck->optionController().' >> '.$MVCRouteCheck->optionAction() );
 		}
-		return $ClassMVCRoute;
+		return $MVCRoute;
 	}
 }
