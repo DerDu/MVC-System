@@ -40,9 +40,10 @@
  * @subpackage MVCManager
  */
 namespace MVCSystem;
-use \AIOSystem\Api\Authentication;
+use \AIOSystem\Api\Authentication as Auth;
 use \AIOSystem\Api\System;
 use \AIOSystem\Api\Event;
+use \AIOSystem\Api\Database;
 /**
  * @package MVCSystem
  * @subpackage MVCManager
@@ -104,7 +105,7 @@ class MVCManager {
 	 * @param null|string $UriPath
 	 * @return mixed
 	 */
-	public static function ExecuteRoute( $UriPath = null ) {
+	public static function ExecuteRoute( $UriPath = null, $isDenied = false ) {
 		/**
 		 * Fetch route
 		 */
@@ -112,24 +113,58 @@ class MVCManager {
 		/**
 		 * Check route restriction
 		 */
-		if( $MVCRoute->IsRestricted() ) {
+		if( $MVCRoute->IsRestricted() && Auth::IsValid() ) {
+			//Event::Message('Restricted User');
 			$MVCRight = str_replace('\\','-',$MVCRoute->GetController().'-'.$MVCRoute->GetAction());
 			/**
 			 * Create/Edit access right
 			 */
-			Authentication::EditRight( $MVCRight,'created by MVC-System',$MVCRoute->optionSource() );
+			Auth::EditRight( $MVCRight,'created by MVC-System',$MVCRoute->optionSource() );
 			/**
 			 * Check access right
 			 */
-			if( !Authentication::Checkpoint( $MVCRight,$MVCRoute->optionSource() ) ) {
-				if( $UriPath === null ) {
-				// = Main content -> Login page
-					$MVCRoute = MVCRouter::Route( self::AccessDeniedRoute() );
+			if( !Auth::Checkpoint( $MVCRight,$MVCRoute->optionSource() ) ) {
+				// No access granted and guards alerted.. "security breach from known user, GET HIM OUT!"
+				if( ($UriPath === null) || ($UriPath !== null && $isDenied) ) {
+					Event::Journal( 'Access to restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );
+					//Event::Message( 'Access to restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );
+					if( $isDenied ) {
+						$MVCRoute = MVCRouter::Route( self::AccessDeniedLink().'/'.str_replace('/','>',$UriPath) );
+					} else {
+					// = Main content -> Login page
+						$MVCRoute = MVCRouter::Route( self::AccessDeniedRoute() );
+					}
+					//Event::Debug( $MVCRoute );
+				// No access granted but no alert.. "somebody just watching the gate"
 				} else {
-				// = Partial content -> Link to login page
-					$MVCRoute = MVCRouter::Route( self::AccessDeniedLink() );
+					Event::Journal( 'Passing restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );
+					// = Partial content
+					//Event::Message( '[User] Passing restricted route (silent): '.$MVCRoute->optionRoute(), __CLASS__ );
+					return;
 				}
 			}
+		} else if( $MVCRoute->IsRestricted() ) {
+			//Event::Message('Restricted Guest');
+			// No access granted and guards alerted.. "security breach from unknown user, GET HIM OUT!"
+			if( ($UriPath === null) || ($UriPath !== null && $isDenied) ) {
+				Event::Journal( 'Access to restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );
+				//Event::Message( 'Access to restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );
+				if( $isDenied ) {
+					$MVCRoute = MVCRouter::Route( self::AccessDeniedLink().'/'.str_replace('/','>',$UriPath) );
+				} else {
+					// = Main content -> Login page
+					$MVCRoute = MVCRouter::Route( self::AccessDeniedRoute() );
+				}
+				//Event::Debug( $MVCRoute );
+				// No access granted but no alert.. "somebody just watching the gate"
+			} else {
+				Event::Journal( 'Passing restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );
+				// = Partial content
+				//Event::Message( '[Guest] Passing restricted route (silent): '.$MVCRoute->optionRoute(), __CLASS__ );
+				return;
+			}
+		} else {
+			//Event::Message('Free Access');
 		}
 		/**
 		 * Create controller
@@ -162,14 +197,21 @@ class MVCManager {
 		$RefMVCParameterList = array();
 		/** @var \ReflectionParameter $RefMVCParameter */
 		foreach( (array)$RefMVCParameterDefinition as $RefMVCParameter ) {
+			//Event::Message('Parameter');
+			//Event::Debug($RefMVCParameter);
 			if( isset( $_REQUEST[$RefMVCParameter->getName()] ) ) {
+				//Event::Message('In Request? -> Request to Parameter');
 				array_push( $RefMVCParameterList, $_REQUEST[$RefMVCParameter->getName()] );
 			} else if( in_array( $RefMVCParameter->getName(), array_keys( $MVCRoute->GetParameter() ) ) ) {
+				//Event::Message('In Default? -> Default to Parameter');
 				array_push( $RefMVCParameterList, $MVCRoute->GetParameter( $RefMVCParameter->getName() ) );
 			} else {
+				//Event::Message('Empty? -> push NULL');
 				array_push( $RefMVCParameterList, null );
 			}
 		}
+		//Event::Message('List:');
+		//Event::Debug($RefMVCParameterList);
 		/**
 		 * Execute route
 		 */
