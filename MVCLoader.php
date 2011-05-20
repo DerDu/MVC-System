@@ -47,6 +47,7 @@ use \AIOSystem\Api\System;
  * @subpackage MVCLoader
  */
 class MVCLoader {
+	const DEBUG = false;
 	const MVC_PREFIX_NAMESPACE = __NAMESPACE__;
 	const MVC_PREFIX_CLASS = 'Class';
 
@@ -93,7 +94,7 @@ class MVCLoader {
 		array_push( $Class, $ClassName );
 		$ClassLocation = System::DirectorySyntax(__DIR__.DIRECTORY_SEPARATOR.self::BaseDirectoryMvcSystem().DIRECTORY_SEPARATOR.implode( '\\', $Class ).'.php',false,System::DIRECTORY_SEPARATOR_BACKSLASH);
 		if( file_exists( $ClassLocation ) ) {
-			//Event::Message( 'MVC Load: '.$ClassLocation );
+			if( self::DEBUG ) Event::Message( 'Load (MVC): '.$ClassLocation );
 			require_once( $ClassLocation );
 			return true;
 		}
@@ -110,7 +111,7 @@ class MVCLoader {
 	public static function ExecuteApplication( $Class ) {
 		$ClassLocation = System::DirectorySyntax(__DIR__.DIRECTORY_SEPARATOR.self::BaseDirectoryApplication().DIRECTORY_SEPARATOR.$Class.'.php',false,System::DIRECTORY_SEPARATOR_BACKSLASH);
 		if( file_exists( $ClassLocation ) ) {
-			//Event::Message( 'APP Load: '.$ClassLocation );
+			if( self::DEBUG ) Event::Message( 'Load (App): '.$ClassLocation );
 			require_once( $ClassLocation );
 			return true;
 		}
