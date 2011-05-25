@@ -3,6 +3,7 @@ namespace MVCSystem;
 use \AIOSystem\Api\Template;
 use \AIOSystem\Api\Stack;
 use \AIOSystem\Api\Event;
+use \AIOSystem\Api\Cache;
 abstract class MVCView {
 	/** @var \AIOSystem\Core\ClassStackRegister|null */
 	private $DataRegister = null;
@@ -22,6 +23,35 @@ abstract class MVCView {
 	 */
 	public function getData( $Index ) {
 		return $this->DataRegister->getRegister( $Index );
+	}
+
+	/**
+	 * Set Cache and return display
+	 *
+	 * @return string
+	 */
+	public function setCache( $Seconds = 3600 ) {
+		Cache::Set( $this->idCache(), ($Display = $this->Display()), get_class( $this ), false, $Seconds );
+		return $Display;
+	}
+	/**
+	 * Return display cache or false
+	 *
+	 * @return false|string
+	 */
+	public function getCache() {
+		return Cache::Get( $this->idCache(), get_class($this), false );
+	}
+	/**
+	 * Create cache identifier
+	 *
+	 * @return string
+	 */
+	private function idCache() {
+		return sha1( get_class( $this )
+			.serialize( get_class_methods( get_class( $this ) ) )
+			.serialize( get_class_vars( get_class( $this ) ) )
+		);
 	}
 
 	/**
