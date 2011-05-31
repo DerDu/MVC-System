@@ -82,7 +82,7 @@ class MVCLoader {
 	 *
 	 * @static
 	 * @param string $Class
-	 * @return void
+	 * @return bool
 	 */
 	public static function ExecuteLoader( $Class ) {
 		$Class = str_replace( self::MVC_PREFIX_NAMESPACE, '', $Class );
@@ -106,7 +106,7 @@ class MVCLoader {
 	 *
 	 * @static
 	 * @param string $Class
-	 * @return void
+	 * @return bool
 	 */
 	public static function ExecuteApplication( $Class ) {
 		$ClassLocation = System::DirectorySyntax(__DIR__.DIRECTORY_SEPARATOR.self::BaseDirectoryApplication().DIRECTORY_SEPARATOR.$Class.'.php',false,System::DIRECTORY_SEPARATOR_BACKSLASH);
