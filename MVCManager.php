@@ -49,6 +49,7 @@ use \AIOSystem\Api\Database;
  * @subpackage MVCManager
  */
 class MVCManager {
+	const DEBUG = false;
 	private static $BaseDirectoryApplication = '';
 
 	private static $BaseDirectoryController = 'MVCSystem\Controller';
@@ -64,6 +65,8 @@ class MVCManager {
 	 * Register MVCLoader
 	 *
 	 * @static
+	 * @param null $RelativePathFromMvcToApplication
+	 * @param null $RelativePathToMvcSystem
 	 * @return void
 	 */
 	public static function RegisterLoader( $RelativePathFromMvcToApplication = null, $RelativePathToMvcSystem = null ) {
@@ -72,7 +75,8 @@ class MVCManager {
 		MVCLoader::RegisterApplication( $RelativePathFromMvcToApplication );
 	}
 	/**
-	 * @param string $ConfigurationFile
+	 * @static
+	 * @param null|string $ConfigurationFile
 	 * @return void
 	 */
 	public static function RegisterRouter( $ConfigurationFile = null ) {
@@ -84,9 +88,10 @@ class MVCManager {
 	 *
 	 * @static
 	 * @param string $Pattern
-	 * @param string $Controller
-	 * @param string $Action
+	 * @param string $Controller - Default: '{Controller}'
+	 * @param string $Action - Default: '{Action}'
 	 * @param array $ParameterDefault
+	 * @param bool $RestrictedAccess
 	 * @return MVCRoute
 	 */
 	public static function RegisterRoute( $Pattern, $Controller = '{Controller}', $Action = '{Action}', $ParameterDefault = array(), $RestrictedAccess = false ) {
@@ -110,11 +115,12 @@ class MVCManager {
 		 * Fetch route
 		 */
 		$MVCRoute = MVCRouter::Route( $UriPath );
+		if(self::DEBUG){Event::Message('Route: ['.$MVCRoute->optionRoute().']',__METHOD__,__LINE__);};
 		/**
 		 * Check route restriction
 		 */
 		if( $MVCRoute->IsRestricted() && Auth::IsValid() ) {
-			//Event::Message('Restricted User');
+			if(self::DEBUG){Event::Message('Restricted User');}
 			$MVCRight = str_replace('\\','-',$MVCRoute->GetController().'-'.$MVCRoute->GetAction());
 			/**
 			 * Create/Edit access right
@@ -127,7 +133,7 @@ class MVCManager {
 				// No access granted and guards alerted.. "security breach from known user, GET HIM OUT!"
 				if( ($UriPath === null) || ($UriPath !== null && $isDenied) ) {
 					Event::Journal( 'Access to restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );
-					//Event::Message( 'Access to restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );
+					if(self::DEBUG){Event::Message( 'Access to restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );}
 					if( $isDenied ) {
 						$MVCRoute = MVCRouter::Route( self::AccessDeniedLink().'/'.str_replace('/','>',$UriPath) );
 					} else {
@@ -139,16 +145,16 @@ class MVCManager {
 				} else {
 					Event::Journal( 'Passing restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );
 					// = Partial content
-					//Event::Message( '[User] Passing restricted route (silent): '.$MVCRoute->optionRoute(), __CLASS__ );
-					return;
+					if(self::DEBUG){Event::Message( '[User] Passing restricted route (silent): '.$MVCRoute->optionRoute(), __CLASS__ );}
+					return null;
 				}
 			}
 		} else if( $MVCRoute->IsRestricted() ) {
-			//Event::Message('Restricted Guest');
+			if(self::DEBUG){Event::Message('Restricted Guest');}
 			// No access granted and guards alerted.. "security breach from unknown user, GET HIM OUT!"
 			if( ($UriPath === null) || ($UriPath !== null && $isDenied) ) {
 				Event::Journal( 'Access to restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );
-				//Event::Message( 'Access to restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );
+				if(self::DEBUG){Event::Message( 'Access to restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );}
 				if( $isDenied ) {
 					$MVCRoute = MVCRouter::Route( self::AccessDeniedLink().'/'.str_replace('/','>',$UriPath) );
 				} else {
@@ -160,11 +166,11 @@ class MVCManager {
 			} else {
 				Event::Journal( 'Passing restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );
 				// = Partial content
-				//Event::Message( '[Guest] Passing restricted route (silent): '.$MVCRoute->optionRoute(), __CLASS__ );
-				return;
+				if(self::DEBUG){Event::Message( '[Guest] Passing restricted route (silent): '.$MVCRoute->optionRoute(), __CLASS__ );}
+				return null;
 			}
 		} else {
-			//Event::Message('Free Access');
+			//if(self::DEBUG){Event::Message('Free Access');}
 		}
 		/**
 		 * Create controller
@@ -220,7 +226,8 @@ class MVCManager {
 
 	/**
 	 * @static
-	 * @return string
+	 * @param null|string $PathName
+	 * @return null|string
 	 */
 	public static function DirectoryController( $PathName = null ) {
 		if( $PathName !== null ) {
@@ -230,7 +237,8 @@ class MVCManager {
 	}
 	/**
 	 * @static
-	 * @return string
+	 * @param null|string $PathName
+	 * @return null|string
 	 */
 	public static function DirectoryApplication( $PathName = null ) {
 		if( $PathName !== null ) {
@@ -240,7 +248,8 @@ class MVCManager {
 	}
 	/**
 	 * @static
-	 * @return string
+	 * @param null|string $PathName
+	 * @return null|string
 	 */
 	public static function DirectoryModel( $PathName = null ) {
 		if( $PathName !== null ) {
@@ -250,7 +259,8 @@ class MVCManager {
 	}
 	/**
 	 * @static
-	 * @return string
+	 * @param null|string $PathName
+	 * @return null|string
 	 */
 	public static function DirectoryView( $PathName = null ) {
 		if( $PathName !== null ) {
@@ -262,7 +272,7 @@ class MVCManager {
 	/**
 	 * @static
 	 * @param null|string $RouteDefinition
-	 * @return string
+	 * @return null|string
 	 */
 	public static function AccessDeniedRoute( $RouteDefinition = null ) {
 		if( $RouteDefinition !== null ) {
@@ -273,7 +283,7 @@ class MVCManager {
 	/**
 	 * @static
 	 * @param null|string $RouteDefinition
-	 * @return string
+	 * @return null|string
 	 */
 	public static function AccessDeniedLink( $RouteDefinition = null ) {
 		if( $RouteDefinition !== null ) {
@@ -290,6 +300,6 @@ class MVCManager {
 	 * @return void
 	 */
 	public static function BuildModel( $Namespace, $Class, $Table ) {
-		return MVCFactory::CreateModel( $Namespace, $Class, $Table );
+		MVCFactory::CreateModel( $Namespace, $Class, $Table );
 	}
 }
