@@ -49,6 +49,13 @@ use \AIOSystem\Api\Template;
  * @subpackage MVCFactory
  */
 class MVCFactory {
+	/**
+	 * @static
+	 * @param string $Namespace __NAMESPACE__
+	 * @param string $Name
+	 * @param string $Table
+	 * @return void
+	 */
 	public static function CreateModel( $Namespace, $Name, $Table ) {
 		global $ADODB_ASSOC_CASE;
 		/** @var \ADORecordSet $RecordSet */
