@@ -41,11 +41,13 @@
  */
 namespace MVCSystem;
 use \AIOSystem\Api\System;
+use \AIOSystem\Api\Event;
 /**
  * @package MVCSystem
  * @subpackage MVCRoute
  */
 class MVCRoute {
+	const DEBUG = false;
 	/** @var string $optionUri URI Syntax */
 	private $optionDefinition = '/{Controller}/{Action}';
 	/** @var string $optionUriPattern URI RexExpr */
@@ -64,9 +66,9 @@ class MVCRoute {
 	private $optionDefault = array();
 	/**
 	 * @param array $ParameterDefault
-	 * @param array $ParameterRequirement
 	 */
 	public function __construct( $ParameterDefault = array() ) {
+		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
 		$this->optionDefault = $ParameterDefault;
 	}
 	/**
@@ -76,12 +78,14 @@ class MVCRoute {
 	 * @return false|MVCRoute
 	 */
 	public function IsMatch( $Route ) {
+		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
 		if( preg_match( '!^'.$this->optionPattern.'$!is', $Route ) ) {
 			$this->optionRoute( $Route );
 			return $this;
 		} return false;
 	}
 	public function IsRestricted() {
+		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
 		return $this->optionRestricted();
 	}
 	/**
@@ -90,6 +94,7 @@ class MVCRoute {
 	 * @return mixed|string
 	 */
 	public function GetController() {
+		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
 		if( substr( $this->optionController(), 0, 1 ) == '{' ) {
 			$Pattern = explode( '/', substr( $this->optionDefinition(), 0 , strpos( $this->optionDefinition(), $this->optionController() ) -1 ) );
 			$Route = explode( '/', $this->optionRoute );
@@ -105,6 +110,7 @@ class MVCRoute {
 	 * @return mixed|string
 	 */
 	public function GetAction() {
+		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
 		if( substr( $this->optionAction(), 0, 1 ) == '{' ) {
 			$Pattern = explode( '/', substr( $this->optionDefinition(), 0 , strpos( $this->optionDefinition(), $this->optionAction() ) -1 ) );
 			$Route = explode( '/', $this->optionRoute );
@@ -118,6 +124,7 @@ class MVCRoute {
 	 * @return array|string
 	 */
 	public function GetParameter( $Name = null ) {
+		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
 		/**
 		 * Prepare data
 		 */
