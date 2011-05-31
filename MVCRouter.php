@@ -50,6 +50,7 @@ use \AIOSystem\Api\Event;
  * @subpackage MVCRouter
  */
 class MVCRouter {
+	const DEBUG = false;
 	/** @var \AIOSystem\Core\ClassStackRegister $RouterStack */
 	private static $RouterStack = null;
 	/** @var string $NoMatchController */
@@ -58,6 +59,7 @@ class MVCRouter {
 	private static $NoMatchAction = 'Display';
 
 	public static function Boot( $ConfigurationFile = null ) {
+		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
 		/**
 		 * Load default configuration?
 		 */
@@ -107,6 +109,7 @@ class MVCRouter {
 	 * @return MVCRoute
 	 */
 	public static function Route( $RoutePath = null ) {
+		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
 		/**
 		 * Route data
 		 */
@@ -134,6 +137,7 @@ class MVCRouter {
 	 * @return MVCRoute
 	 */
 	public static function NoRoute( $RoutePath ) {
+		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
 		$NoMatchRoute = new MVCRoute( array( 'MVCErrorType'=>404,'MVCErrorInformation'=>$RoutePath ) );
 		$NoMatchRoute->optionDefinition('');
 		$NoMatchRoute->optionRoute('');
@@ -151,9 +155,11 @@ class MVCRouter {
 	 * @param string $Controller
 	 * @param string $Action
 	 * @param array $ParameterDefault
+	 * @param bool $RestrictedAccess
 	 * @return MVCRoute
 	 */
 	public static function Register( $Pattern, $Controller = '{Controller}', $Action = '{Action}', $ParameterDefault = array(), $RestrictedAccess = false ) {
+		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
 		/**
 		 * Prepare router stack
 		 */
