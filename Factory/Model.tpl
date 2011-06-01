@@ -14,14 +14,16 @@ class {ModelName} extends \MVCSystem\MVCModel {
 
 	/**
 	 * Constructor
+	 *
+	 * @return {ModelName}
 	 */
-	public static function InstanceAdd(){
+	public static function _oInstanceAdd(){
 		return new {ModelName};
 	}
-	public static function Instance( $Selector ){
+	public static function _oInstance( $Selector ){
 		$Model = new {ModelName};
 		$Model->Selector = $Selector;
-		$Model->Load();
+		$Model->_oLoad();
 		if( count($Model->ADORecord) > 1 ) {
 			throw new \Exception('Instance selector is not biunique!');
 		} else if( isset($Model->ADORecord[0]) ) {
@@ -31,10 +33,10 @@ class {ModelName} extends \MVCSystem\MVCModel {
 		}
 		return $Model;
 	}
-	public static function InstanceList( $Selector = '' ){
+	public static function _oInstanceList( $Selector = '' ){
 		$Model = new {ModelName};
 		$Model->Selector = $Selector;
-		$Model->Load();
+		$Model->_oLoad();
 		$InstanceList = array();
 		foreach((array)$Model->ADORecord as $ADORecord) {
 			$ModelInstance = new {ModelName};
@@ -44,26 +46,38 @@ class {ModelName} extends \MVCSystem\MVCModel {
 		return $InstanceList;
 	}
 
+	/**
+	 * Must not call!
+	 * Use: _oInstance, _oInstanceAdd or _oInstanceList
+	 */
 	private function __construct(){
 	}
 
 	/**
 	 * Read/Write
 	 */
-	public function Load(){
+	public function _oLoad(){
 		$this->ADORecord = Database::ADOConnection()->GetActiveRecords('{ModelTable}',$this->Selector);
 	}
-	public function Kill(){
+	public function _oKill(){
 		$this->ADORecord->Delete();
 	}
-	public function Save(){
+	public function _oSave(){
 		if( is_object($this->ADORecord) ) {
 			$this->ADORecord->Save();
 		} else {
-			$this->ADORecord = $this->_Create()->ADORecord;
+			$this->ADORecord = $this->_oCreate()->ADORecord;
 		}
 	}
-	private function _Create(){
+	public function _oData(){
+		return array(
+		{ModelPropertyMethod}
+			'{PropertyName}'=>$this->{PropertyName}(),
+		{/ModelPropertyMethod}
+		);
+	}
+
+	private function _oCreate(){
 		$Where = array();
 		foreach((array)$this->ADORecordData as $Name => $Value){
 			array_push( $Where, $Name." = '".$Value."'" );
