@@ -62,7 +62,8 @@ abstract class MVCModel {
 		}
 		return  $DataArray;
 	}
-	abstract public function Load();
-	abstract public function Save();
-	abstract public function Kill();
+	abstract public function _oLoad();
+	abstract public function _oSave();
+	abstract public function _oKill();
+	abstract public function _oData();
 }
