@@ -41,6 +41,7 @@
  */
 namespace MVCSystem;
 use \AIOSystem\Api\Event;
+use \AIOSystem\Api\Stack;
 use \AIOSystem\Api\System;
 use \AIOSystem\Api\Database;
 use \AIOSystem\Api\Template;
@@ -49,6 +50,9 @@ use \AIOSystem\Api\Template;
  * @subpackage MVCFactory
  */
 class MVCFactory {
+	const MVCFACTORY_MODELSTORE_PREFIX = 'MVCModelStore';
+	/** @var null|\AIOSystem\Core\ClassStackPriority $ModelPropertyStack */
+	private static $ModelPropertyStack = null;
 	/**
 	 * @static
 	 * @param string $Namespace __NAMESPACE__
@@ -56,8 +60,30 @@ class MVCFactory {
 	 * @param string $Table
 	 * @return void
 	 */
-	public static function CreateModel( $Namespace, $Name, $Table ) {
+	public static function BuildModel( $ModelNamespace, $ModelName, $TableName, $doOverwrite = false, $Directory = null ) {
+		$TableName = str_replace(' ', '', ucwords(
+			preg_replace( array('![^\w\d]!is', '!\s{2,}!'), array(' ',''),
+				self::MVCFACTORY_MODELSTORE_PREFIX.'\\'.$ModelNamespace.'\\'.$TableName
+			)
+		));
+		// Create Store
+		$TableList = Database::ADOConnection()->MetaTables('TABLES');
+		$TableList = array_map( 'strtoupper', $TableList );
+		if( !in_array( strtoupper($TableName), $TableList ) ) {
+			self::CreateStore( $TableName );
+		} else if( true === $doOverwrite ) {
+			Database::DropTable( $TableName );
+			self::CreateStore( $TableName );
+		}
+		// Create Model
+		self::CreateModel( $ModelNamespace, $ModelName, $TableName, $Directory );
+	}
+
+	private static function CreateModel( $Namespace, $Name, $Table, $Directory = null ) {
 		global $ADODB_ASSOC_CASE;
+		if( $Directory === null ) {
+			$Directory = System::DirectoryCurrent();
+		}
 		/** @var \ADORecordSet $RecordSet */
 		$RecordSet = Database::ADOConnection()->SelectLimit("SELECT * FROM ".$Table,1);
 		/** @var array $Record */
@@ -75,8 +101,75 @@ class MVCFactory {
 		}
 		$Blueprint->Repeat('ModelProperty', $PropertyList );
 		$Blueprint->Repeat('ModelPropertyMethod', $PropertyList );
-		$Model = System::File( System::CreateDirectory( System::DirectorySyntax( __DIR__.DIRECTORY_SEPARATOR.MVCLoader::BaseDirectoryApplication().DIRECTORY_SEPARATOR.$Namespace ) ).$Name.'.php' );
+		//$Model = System::File( System::CreateDirectory( System::DirectorySyntax( __DIR__.DIRECTORY_SEPARATOR.MVCLoader::BaseDirectoryApplication().DIRECTORY_SEPARATOR.$Namespace ) ).$Name.'.php' );
+		Event::Message( $Directory, __METHOD__ );
+
+		$Model = System::File( System::CreateDirectory( System::DirectorySyntax( $Directory.DIRECTORY_SEPARATOR.$Namespace ) ).$Name.'.php' );
 		$Model->propertyFileContent( $Blueprint->Parse() );
 		$Model->writeFile();
+		Event::Debug( $Model->propertyFileLocation(), __FILE__,__LINE__ );
+	}
+
+	private static function CreateStore( $Table ) {
+		$FieldSet = self::$ModelPropertyStack->listData();
+		self::$ModelPropertyStack = Stack::Priority('\\'.__CLASS__.'::SortProperty');
+		Database::CreateTable( $Table, $FieldSet );
+	}
+
+	public static function AddProperty( $Name, $Type, $Length = null ) {
+		$Property = array( trim($Name), trim($Type), ($Length===null?null:trim($Length)) );
+		// Add options
+		$ParameterCount = func_num_args();
+		for( $Run = 3; $Run < $ParameterCount; $Run++ ) {
+			array_push( $Property, trim(func_get_arg($Run)) );
+		}
+		if( self::$ModelPropertyStack === null ) {
+			self::$ModelPropertyStack = Stack::Priority('\\'.__CLASS__.'::SortProperty');
+		}
+		self::$ModelPropertyStack->pushData( $Property );
+	}
+	/**
+	 * @static
+	 * @param string $Name
+	 * @return bool
+	 */
+	public static function RemoveProperty( $Name ) {
+		$DataList = self::$ModelPropertyStack->listData();
+		foreach( (array)$DataList as $Index => $Data ) {
+			if( $Data[0] == trim($Name) ) {
+				self::$ModelPropertyStack->removeData( $Index );
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * @static
+	 * @param array $A
+	 * @param array $B
+	 * @return int
+	 */
+	public static function SortProperty( $A, $B ) {
+		$A = $A[0]; $B = $B[0];
+		// "id" is always first column
+		if( strtoupper($A) == 'ID' ) {
+			return -1;
+		}
+		if( strtoupper($B) == 'ID' ) {
+			return 1;
+		}
+		// Sort other columns
+		$S = array( $A, $B );
+		sort( $S );
+		if( $S[0] != $A ) {
+			return 1;
+		} else {
+			return -1;
+		}
+	}
+
+	public static function DEBUG() {
+		Event::Debug( self::$ModelPropertyStack );
 	}
 }
