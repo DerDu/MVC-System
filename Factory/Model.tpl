@@ -70,20 +70,22 @@ class {ModelName} extends \MVCSystem\MVCModel {
 		}
 	}
 	public function _oData(){
-		return array(
-		{ModelPropertyMethod}
-			'{PropertyName}'=>$this->{PropertyName}(),
-		{/ModelPropertyMethod}
+		return array({ModelPropertyMethod}
+			'{PropertyName}'=>$this->{PropertyName}(),{/ModelPropertyMethod}
 		);
 	}
 
 	private function _oCreate(){
 		$Where = array();
 		foreach((array)$this->ADORecordData as $Name => $Value){
-			array_push( $Where, $Name." = '".$Value."'" );
+			if( is_num( $Value ) ) {
+				array_push( $Where, $Name." = ".$Value );
+			} else {
+				array_push( $Where, $Name." = '".$Value."'" );
+			}
 		}
 		Database::Record( '{ModelTable}', $this->ADORecordData, $Where );
-		return self::Instance( implode( ' AND ', $Where ) );
+		return self::_oInstance( implode( ' AND ', $Where ) );
 	}
 
 	/**
