@@ -42,6 +42,7 @@
 namespace MVCSystem;
 use \AIOSystem\Api\Authentication as Auth;
 use \AIOSystem\Api\System;
+use \AIOSystem\Api\Seo;
 use \AIOSystem\Api\Event;
 use \AIOSystem\Api\Database;
 /**
@@ -95,6 +96,7 @@ class MVCManager {
 	 * @return MVCRoute
 	 */
 	public static function RegisterRoute( $Pattern, $Controller = '{Controller}', $Action = '{Action}', $ParameterDefault = array(), $RestrictedAccess = false ) {
+		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
 		return MVCRouter::Register(
 			$Pattern,
 			System::DirectorySyntax( self::DirectoryController(), true, System::DIRECTORY_SEPARATOR_BACKSLASH ).$Controller,
@@ -111,6 +113,18 @@ class MVCManager {
 	 * @return mixed
 	 */
 	public static function ExecuteRoute( $UriPath = null, $isDenied = false ) {
+		/**
+		 * Pre-fetch
+		 */
+		$SeoRequest = array();
+		if( $UriPath !== null ) {
+			//Event::Message( 'Before: '.$UriPath,__METHOD__ );
+			//Event::Debug( $_REQUEST );
+			$SeoRequest = $_REQUEST;
+			$UriPath = Seo::Request( $UriPath );
+			//Event::Message( 'After: '.$UriPath,__METHOD__ );
+			//Event::Debug( $_REQUEST );
+		}
 		/**
 		 * Fetch route
 		 */
@@ -146,6 +160,12 @@ class MVCManager {
 					Event::Journal( 'Passing restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );
 					// = Partial content
 					if(self::DEBUG){Event::Message( '[User] Passing restricted route (silent): '.$MVCRoute->optionRoute(), __CLASS__ );}
+					/**
+					 * Post-fetch
+					 */
+					if( $UriPath !== null ) {
+						$_REQUEST = $SeoRequest;
+					}
 					return null;
 				}
 			}
@@ -167,6 +187,12 @@ class MVCManager {
 				Event::Journal( 'Passing restricted route: '.$MVCRoute->optionRoute(), __CLASS__ );
 				// = Partial content
 				if(self::DEBUG){Event::Message( '[Guest] Passing restricted route (silent): '.$MVCRoute->optionRoute(), __CLASS__ );}
+				/**
+				 * Post-fetch
+				 */
+				if( $UriPath !== null ) {
+					$_REQUEST = $SeoRequest;
+				}
 				return null;
 			}
 		} else {
@@ -203,8 +229,6 @@ class MVCManager {
 		$RefMVCParameterList = array();
 		/** @var \ReflectionParameter $RefMVCParameter */
 		foreach( (array)$RefMVCParameterDefinition as $RefMVCParameter ) {
-			//Event::Message('Parameter');
-			//Event::Debug($RefMVCParameter);
 			if( isset( $_REQUEST[$RefMVCParameter->getName()] ) ) {
 				//Event::Message('In Request? -> Request to Parameter');
 				array_push( $RefMVCParameterList, $_REQUEST[$RefMVCParameter->getName()] );
@@ -216,8 +240,12 @@ class MVCManager {
 				array_push( $RefMVCParameterList, null );
 			}
 		}
-		//Event::Message('List:');
-		//Event::Debug($RefMVCParameterList);
+		/**
+		 * Post-fetch
+		 */
+		if( $UriPath !== null ) {
+			$_REQUEST = $SeoRequest;
+		}
 		/**
 		 * Execute route
 		 */
@@ -299,7 +327,7 @@ class MVCManager {
 	 * @param string $Table
 	 * @return void
 	 */
-	public static function BuildModel( $Namespace, $Class, $Table ) {
-		MVCFactory::CreateModel( $Namespace, $Class, $Table );
+	public static function BuildModel( $Namespace, $Class, $Table, $doOverwrite = false ) {
+		MVCFactory::BuildModel( $Namespace, $Class, $Table, $doOverwrite );
 	}
 }
