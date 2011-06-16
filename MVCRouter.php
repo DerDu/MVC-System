@@ -59,7 +59,6 @@ class MVCRouter {
 	private static $NoMatchAction = 'Display';
 
 	public static function Boot( $ConfigurationFile = null ) {
-		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
 		/**
 		 * Load default configuration?
 		 */
@@ -68,6 +67,7 @@ class MVCRouter {
 		}
 		if( file_exists( $ConfigurationFile ) ) {
 			$Configuration = System::File( $ConfigurationFile );
+			if(self::DEBUG){Event::Message('Boot['.__METHOD__.'] '.$Configuration->propertyFileLocation(),__FILE__,__LINE__);}
 			$MVCRouterConfiguration = Xml::Parser( $Configuration->propertyFileLocation() )->groupXmlNode('MVCRoute');
 			/**
 			 * Register available routes
@@ -93,8 +93,10 @@ class MVCRouter {
 				/**
 				 * Save configuration source path
 				 */
-				$Source = basename( MVCLoader::BaseDirectoryApplication() );
+				//$Source = basename( MVCLoader::BaseDirectoryApplication() );
+				$Source = basename( MVCManager::DirectoryApplication() );
 				$Route->optionSource( $Source );
+				if(self::DEBUG){Event::Debug($Route,__FILE__,__LINE__);}
 			}
 		} else {
 			throw new \Exception('Router configuration file not available!');
@@ -185,6 +187,7 @@ class MVCRouter {
 		} else {
 			throw new \Exception('Route already exists! '.$MVCRouteCheck->optionDefinition().' >> '.$MVCRouteCheck->optionController().' >> '.$MVCRouteCheck->optionAction() );
 		}
+		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
 		return $MVCRoute;
 	}
 }
