@@ -182,6 +182,7 @@ class MVCFactory {
 
 	/**
 	 * This method is used to sort model properties
+	 *
 	 * should not be called
 	 *
 	 * @static
