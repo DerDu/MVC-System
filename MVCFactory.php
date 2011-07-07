@@ -55,9 +55,12 @@ class MVCFactory {
 	 * This method is used to create/overwrite a full model
 	 *
 	 * @static
-	 * @param string $Namespace __NAMESPACE__
-	 * @param string $Name
-	 * @param string $Table
+	 * @param string $ModelNamespace __NAMESPACE__
+	 * @param string $ModelName
+	 * @param string $TableName
+	 * @param false|boolean $doOverwrite
+	 * @param null|string $Directory
+	 * @param int $Level
 	 * @return void
 	 */
 	public static function BuildModel( $ModelNamespace, $ModelName, $TableName, $doOverwrite = false, $Directory = null, $Level = 0 ) {
