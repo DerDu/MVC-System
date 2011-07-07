@@ -37,29 +37,37 @@
 // ---------------------------------------------------------------------------------------
  *
  * @package MVCSystem\View
- * @subpackage MVCError
  */
 namespace View;
 use \AIOSystem\Api\Event;
-/*
+/**
  * @package MVCSystem\View
- * @subpackage MVCError
  */
 class MVCError extends \MVCSystem\MVCView {
+	/**
+	 * Fetch Template: 404
+	 *
+	 * @return \AIOSystem\Module\Template\ClassTemplate
+	 */
 	private function _error404() {
 		$Template = $this->Template( 'MVCError404.tpl' );
 		return $Template;
 	}
+	/**
+	 * Fetch Template: 500
+	 *
+	 * @return \AIOSystem\Module\Template\ClassTemplate
+	 */
 	private function _error500() {
 		$Template = $this->Template( 'MVCError500.tpl' );
 		return $Template;
 	}
 	/**
+	 * This method is used to return the view content
+	 *
 	 * @return string
 	 */
 	public function Display() {
-		//Event::Message('View: '.__DIR__);
-
 		$Error = $this->Template( 'MVCError.tpl' );
 		switch( $this->getData('MVCErrorType') ) {
 			case 404: {

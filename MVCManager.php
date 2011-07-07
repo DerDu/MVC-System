@@ -37,7 +37,6 @@
 // ---------------------------------------------------------------------------------------
  *
  * @package MVCSystem
- * @subpackage MVCManager
  */
 namespace MVCSystem;
 use \AIOSystem\Api\Authentication as Auth;
@@ -47,7 +46,6 @@ use \AIOSystem\Api\Event;
 use \AIOSystem\Api\Database;
 /**
  * @package MVCSystem
- * @subpackage MVCManager
  */
 class MVCManager {
 	const DEBUG = false;
@@ -110,7 +108,8 @@ class MVCManager {
 	 *
 	 * @static
 	 * @param null|string $UriPath
-	 * @return mixed
+	 * @param boolean $isDenied
+	 * @return null|mixed
 	 */
 	public static function ExecuteRoute( $UriPath = null, $isDenied = false ) {
 		/**
@@ -325,6 +324,7 @@ class MVCManager {
 	 * @param string $Namespace
 	 * @param string $Class
 	 * @param string $Table
+	 * @param boolean $doOverwrite
 	 * @return void
 	 */
 	public static function BuildModel( $Namespace, $Class, $Table, $doOverwrite = false ) {

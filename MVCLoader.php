@@ -37,14 +37,12 @@
 // ---------------------------------------------------------------------------------------
  *
  * @package MVCSystem
- * @subpackage MVCLoader
  */
 namespace MVCSystem;
 use \AIOSystem\Api\Event;
 use \AIOSystem\Api\System;
 /**
  * @package MVCSystem
- * @subpackage MVCLoader
  */
 class MVCLoader {
 	const DEBUG = false;
@@ -67,7 +65,12 @@ class MVCLoader {
 			spl_autoload_register( array(__CLASS__,'ExecuteLoader') );
 		}
 	}
-
+	/**
+	 * Register Application with Php-AutoLoad
+	 *
+	 * @static
+	 * @return void
+	 */
 	public static function RegisterApplication( $Path = null ) {
 		self::BaseDirectoryApplication( $Path );
 		$AutoLoader = spl_autoload_functions();

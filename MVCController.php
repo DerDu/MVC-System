@@ -37,12 +37,10 @@
 // ---------------------------------------------------------------------------------------
  *
  * @package MVCSystem
- * @subpackage MVCController
  */
 namespace MVCSystem;
 /**
  * @package MVCSystem
- * @subpackage MVCController
  */
 class MVCController {
 	/**

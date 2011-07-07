@@ -37,7 +37,6 @@
 // ---------------------------------------------------------------------------------------
  *
  * @package MVCSystem
- * @subpackage MVCFactory
  */
 namespace MVCSystem;
 use \AIOSystem\Api\Event;
@@ -47,20 +46,21 @@ use \AIOSystem\Api\Database;
 use \AIOSystem\Api\Template;
 /**
  * @package MVCSystem
- * @subpackage MVCFactory
  */
 class MVCFactory {
 	const MVCFACTORY_MODELSTORE_PREFIX = 'MVCModelStore';
 	/** @var null|\AIOSystem\Core\ClassStackPriority $ModelPropertyStack */
 	private static $ModelPropertyStack = null;
 	/**
+	 * This method is used to create/overwrite a full model
+	 *
 	 * @static
 	 * @param string $Namespace __NAMESPACE__
 	 * @param string $Name
 	 * @param string $Table
 	 * @return void
 	 */
-	public static function BuildModel( $ModelNamespace, $ModelName, $TableName, $doOverwrite = false, $Directory = null ) {
+	public static function BuildModel( $ModelNamespace, $ModelName, $TableName, $doOverwrite = false, $Directory = null, $Level = 0 ) {
 		$TableName = str_replace(' ', '', ucwords(
 			preg_replace( array('![^\w\d]!is', '!\s{2,}!'), array(' ',''),
 				self::MVCFACTORY_MODELSTORE_PREFIX.'\\'.$ModelNamespace.'\\'.$TableName
@@ -76,10 +76,21 @@ class MVCFactory {
 			self::CreateStore( $TableName );
 		}
 		// Create Model
-		self::CreateModel( $ModelNamespace, $ModelName, $TableName, $Directory );
+		self::CreateModel( $ModelNamespace, $ModelName, $TableName, $Directory, $Level );
 	}
 
-	private static function CreateModel( $Namespace, $Name, $Table, $Directory = null ) {
+	/**
+	 * Create model class
+	 *
+	 * @static
+	 * @param string $Namespace __NAMESPACE__
+	 * @param string $Name
+	 * @param string $Table
+	 * @param null|string $Directory
+	 * @param int $Level
+	 * @return void
+	 */
+	private static function CreateModel( $Namespace, $Name, $Table, $Directory = null, $Level = 0 ) {
 		global $ADODB_ASSOC_CASE;
 		if( $Directory === null ) {
 			$Directory = System::DirectoryCurrent();
@@ -102,20 +113,40 @@ class MVCFactory {
 		$Blueprint->Repeat('ModelProperty', $PropertyList );
 		$Blueprint->Repeat('ModelPropertyMethod', $PropertyList );
 		//$Model = System::File( System::CreateDirectory( System::DirectorySyntax( __DIR__.DIRECTORY_SEPARATOR.MVCLoader::BaseDirectoryApplication().DIRECTORY_SEPARATOR.$Namespace ) ).$Name.'.php' );
-		Event::Message( $Directory, __METHOD__ );
-
+		//Event::Message( $Directory, __METHOD__ );
+		if( $Level > 0 ) {
+			$Namespace = explode( '\\',$Namespace );
+			for( $WalkLevel = $Level; $WalkLevel > 0; $WalkLevel-- ) {
+				array_shift( $Namespace );
+			}
+			$Namespace = implode( '\\',$Namespace );
+		}
 		$Model = System::File( System::CreateDirectory( System::DirectorySyntax( $Directory.DIRECTORY_SEPARATOR.$Namespace ) ).$Name.'.php' );
 		$Model->propertyFileContent( $Blueprint->Parse() );
 		$Model->writeFile();
-		Event::Debug( $Model->propertyFileLocation(), __FILE__,__LINE__ );
+		//Event::Debug( $Model->propertyFileLocation(), __FILE__,__LINE__ );
 	}
-
+	/**
+	 * Create model table
+	 *
+	 * @static
+	 * @param string $Table
+	 * @return void
+	 */
 	private static function CreateStore( $Table ) {
 		$FieldSet = self::$ModelPropertyStack->listData();
 		self::$ModelPropertyStack = Stack::Priority('\\'.__CLASS__.'::SortProperty');
 		Database::CreateTable( $Table, $FieldSet );
 	}
-
+	/**
+	 * This method is used to add properties to the model
+	 *
+	 * @static
+	 * @param string $Name
+	 * @param string $Type
+	 * @param null $Length
+	 * @return void
+	 */
 	public static function AddProperty( $Name, $Type, $Length = null ) {
 		$Property = array( trim($Name), trim($Type), ($Length===null?null:trim($Length)) );
 		// Add options
@@ -129,6 +160,8 @@ class MVCFactory {
 		self::$ModelPropertyStack->pushData( $Property );
 	}
 	/**
+	 * This method is used to remove properties from the model
+	 *
 	 * @static
 	 * @param string $Name
 	 * @return bool
@@ -145,6 +178,9 @@ class MVCFactory {
 	}
 
 	/**
+	 * This method is used to sort model properties
+	 * should not be called
+	 *
 	 * @static
 	 * @param array $A
 	 * @param array $B
@@ -168,8 +204,9 @@ class MVCFactory {
 			return -1;
 		}
 	}
-
+/*
 	public static function DEBUG() {
 		Event::Debug( self::$ModelPropertyStack );
 	}
+*/
 }

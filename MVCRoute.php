@@ -37,14 +37,12 @@
 // ---------------------------------------------------------------------------------------
  *
  * @package MVCSystem
- * @subpackage MVCRoute
  */
 namespace MVCSystem;
 use \AIOSystem\Api\System;
 use \AIOSystem\Api\Event;
 /**
  * @package MVCSystem
- * @subpackage MVCRoute
  */
 class MVCRoute {
 	const DEBUG = false;
@@ -66,6 +64,7 @@ class MVCRoute {
 	private $optionDefault = array();
 	/**
 	 * @param array $ParameterDefault
+	 * @return void
 	 */
 	public function __construct( $ParameterDefault = array() ) {
 		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
@@ -75,7 +74,7 @@ class MVCRoute {
 	 * Check if pattern matches route
 	 *
 	 * @param string $Route
-	 * @return false|MVCRoute
+	 * @return boolean|MVCRoute
 	 */
 	public function IsMatch( $Route ) {
 		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
@@ -84,6 +83,11 @@ class MVCRoute {
 			return $this;
 		} return false;
 	}
+	/**
+	 * Check if route is restricted to authenticated users
+	 *
+	 * @return null|boolean
+	 */
 	public function IsRestricted() {
 		if(self::DEBUG){Event::Message(__METHOD__,__FILE__,__LINE__);}
 		return $this->optionRestricted();

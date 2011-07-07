@@ -37,7 +37,6 @@
 // ---------------------------------------------------------------------------------------
  *
  * @package MVCSystem
- * @subpackage MVCRouter
  */
 namespace MVCSystem;
 use \AIOSystem\Api\Stack;
@@ -47,7 +46,6 @@ use \AIOSystem\Api\System;
 use \AIOSystem\Api\Event;
 /**
  * @package MVCSystem
- * @subpackage MVCRouter
  */
 class MVCRouter {
 	const DEBUG = false;
@@ -57,7 +55,15 @@ class MVCRouter {
 	private static $NoMatchController = 'Controller\MVCError';
 	/** @var string $NoMatchAction */
 	private static $NoMatchAction = 'Display';
-
+	/**
+	 * Load router configuration
+	 * Set up routes
+	 *
+	 * @static
+	 * @throws \Exception
+	 * @param null|string $ConfigurationFile
+	 * @return void
+	 */
 	public static function Boot( $ConfigurationFile = null ) {
 		/**
 		 * Load default configuration?
