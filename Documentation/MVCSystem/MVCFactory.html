@@ -180,7 +180,7 @@ Source Location: /MVCFactory.php<br /><br />
 											<span class="method-result">int</span>&nbsp;&nbsp;
 					</td>
 					<td class="method-definition"><a href="#SortProperty" title="details" class="method-name">SortProperty</a>()&nbsp;&nbsp;</td>
-					<td class="method-definition">This method is used to sort model properties  should not be called</td></tr>
+					<td class="method-definition">This method is used to sort model properties</td></tr>
 				</div>
 																																																</table>
 			</div>
@@ -203,7 +203,7 @@ Source Location: /MVCFactory.php<br /><br />
 <div class="oddrow">
 
 <div class="method-header">
-	<span class="method-title">static method AddProperty</span>&nbsp;&nbsp;<span class="smalllinenumber">[line <a href="../__filesource/fsource_MVCSystem__MVCFactory.php.html#a150">150</a>]</span>
+	<span class="method-title">static method AddProperty</span>&nbsp;&nbsp;<span class="smalllinenumber">[line <a href="../__filesource/fsource_MVCSystem__MVCFactory.php.html#a153">153</a>]</span>
 </div>
 <br />
 
@@ -262,7 +262,7 @@ $Length = null]&nbsp;
 <div class="evenrow">
 
 <div class="method-header">
-	<span class="method-title">static method BuildModel</span>&nbsp;&nbsp;<span class="smalllinenumber">[line <a href="../__filesource/fsource_MVCSystem__MVCFactory.php.html#a63">63</a>]</span>
+	<span class="method-title">static method BuildModel</span>&nbsp;&nbsp;<span class="smalllinenumber">[line <a href="../__filesource/fsource_MVCSystem__MVCFactory.php.html#a66">66</a>]</span>
 </div>
 <br />
 
@@ -270,16 +270,13 @@ $Length = null]&nbsp;
     <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code-border">
     <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">&nbsp;
 		<code>static void BuildModel(
-
-$ModelNamespace, 
-$ModelName, 
-$TableName, [
-$doOverwrite = false], [
-$Directory = null], [
-$Level = 0], string
-$Namespace, string
-$Name, string
-$Table&nbsp;
+string
+$ModelNamespace, string
+$ModelName, string
+$TableName, [false|boolean
+$doOverwrite = false], [null|string
+$Directory = null], [int
+$Level = 0]&nbsp;
 )</code>
     </td></tr></table>
     </td></tr></table><br /></div>
@@ -292,53 +289,35 @@ $Table&nbsp;
 					<tr><td class="indent">
 				<span class="var-type">string</span>&nbsp;&nbsp;</td>
 				<td>
-				<span class="var-name">$Namespace:&nbsp;</span></td>
+				<span class="var-name">$ModelNamespace:&nbsp;</span></td>
 				<td>
 				<span class="var-description"> __NAMESPACE__</span>			</td></tr>
 					<tr><td class="indent">
 				<span class="var-type">string</span>&nbsp;&nbsp;</td>
 				<td>
-				<span class="var-name">$Name:&nbsp;</span></td>
+				<span class="var-name">$ModelName:&nbsp;</span></td>
 				<td>
 							</td></tr>
 					<tr><td class="indent">
 				<span class="var-type">string</span>&nbsp;&nbsp;</td>
 				<td>
-				<span class="var-name">$Table:&nbsp;</span></td>
-				<td>
-							</td></tr>
-					<tr><td class="indent">
-				<span class="var-type"></span>&nbsp;&nbsp;</td>
-				<td>
-				<span class="var-name">$ModelNamespace:&nbsp;</span></td>
-				<td>
-							</td></tr>
-					<tr><td class="indent">
-				<span class="var-type"></span>&nbsp;&nbsp;</td>
-				<td>
-				<span class="var-name">$ModelName:&nbsp;</span></td>
-				<td>
-							</td></tr>
-					<tr><td class="indent">
-				<span class="var-type"></span>&nbsp;&nbsp;</td>
-				<td>
 				<span class="var-name">$TableName:&nbsp;</span></td>
 				<td>
 							</td></tr>
 					<tr><td class="indent">
-				<span class="var-type"></span>&nbsp;&nbsp;</td>
+				<span class="var-type">false|boolean</span>&nbsp;&nbsp;</td>
 				<td>
 				<span class="var-name">$doOverwrite:&nbsp;</span></td>
 				<td>
 							</td></tr>
 					<tr><td class="indent">
-				<span class="var-type"></span>&nbsp;&nbsp;</td>
+				<span class="var-type">null|string</span>&nbsp;&nbsp;</td>
 				<td>
 				<span class="var-name">$Directory:&nbsp;</span></td>
 				<td>
 							</td></tr>
 					<tr><td class="indent">
-				<span class="var-type"></span>&nbsp;&nbsp;</td>
+				<span class="var-type">int</span>&nbsp;&nbsp;</td>
 				<td>
 				<span class="var-name">$Level:&nbsp;</span></td>
 				<td>
@@ -363,7 +342,7 @@ $Table&nbsp;
 <div class="oddrow">
 
 <div class="method-header">
-	<span class="method-title">static method RemoveProperty</span>&nbsp;&nbsp;<span class="smalllinenumber">[line <a href="../__filesource/fsource_MVCSystem__MVCFactory.php.html#a169">169</a>]</span>
+	<span class="method-title">static method RemoveProperty</span>&nbsp;&nbsp;<span class="smalllinenumber">[line <a href="../__filesource/fsource_MVCSystem__MVCFactory.php.html#a172">172</a>]</span>
 </div>
 <br />
 
@@ -408,7 +387,7 @@ $Name&nbsp;
 <div class="evenrow">
 
 <div class="method-header">
-	<span class="method-title">static method SortProperty</span>&nbsp;&nbsp;<span class="smalllinenumber">[line <a href="../__filesource/fsource_MVCSystem__MVCFactory.php.html#a189">189</a>]</span>
+	<span class="method-title">static method SortProperty</span>&nbsp;&nbsp;<span class="smalllinenumber">[line <a href="../__filesource/fsource_MVCSystem__MVCFactory.php.html#a193">193</a>]</span>
 </div>
 <br />
 
@@ -423,9 +402,9 @@ $B&nbsp;
     </td></tr></table>
     </td></tr></table><br /></div>
 
-	<p align="center" class="short-description"><strong>This method is used to sort model properties  should not be called
+	<p align="center" class="short-description"><strong>This method is used to sort model properties
 </strong></p>
-
+<span class="description"><p>should not be called</p></span>
 			<strong>Parameters:</strong><br />
 			<table border="0" cellspacing="0" cellpadding="0">
 					<tr><td class="indent">
@@ -490,7 +469,7 @@ $B&nbsp;
 
         <div class="credit">
 		    <hr class="separator" />
-		    Documentation generated on Thu, 07 Jul 2011 15:11:29 +0200 by <a href="http://www.phpdoc.org">phpDocumentor 1.4.3</a>
+		    Documentation generated on Thu, 07 Jul 2011 15:43:24 +0200 by <a href="http://www.phpdoc.org">phpDocumentor 1.4.3</a>
 	      </div>
       </td></tr></table>
     </td>
